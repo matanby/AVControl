@@ -104,10 +104,11 @@
             changes for each new modality.
           </p>
           <p>
-            We introduce <b>AVControl</b>, a lightweight, extendable framework where each control
-            modality is trained as a separate LoRA on a <em>parallel canvas</em> (a reference signal
-            provided as additional tokens in the attention layers), requiring no architectural changes
-            beyond the LoRA adapters themselves. We show that simply extending image-based in-context
+            We introduce <b>AVControl</b>, a lightweight, extendable framework built on
+            <a href="https://ltx.io/model/ltx-2">LTX-2</a>, a joint audio-visual foundation model,
+            where each control modality is trained as a separate LoRA on a <em>parallel canvas</em>
+            (a reference signal provided as additional tokens in the attention layers), requiring
+            no architectural changes beyond the LoRA adapters themselves. We show that simply extending image-based in-context
             methods to video via channel concatenation fails for structural control, and that our
             parallel canvas approach resolves this.
           </p>
