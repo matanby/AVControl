@@ -51,6 +51,13 @@ body {
 
 .link-block .button {
   font-family: 'Google Sans', sans-serif;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.link-block .button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  background-color: #363636;
 }
 
 /* Separator between hero and teaser */
