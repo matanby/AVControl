@@ -329,6 +329,26 @@
       </div>
     </div>
 
+    <h5 class="title is-6">Diverse Camera Trajectories <span class="has-text-grey-light has-text-weight-normal">(same source image)</span></h5>
+    <div class="columns is-mobile">
+      <div class="column">
+        <div class="video-card"><video autoplay muted loop playsinline><source src="static/videos/camera_diverse_out_00005.mp4" type="video/mp4"></video></div>
+        <p class="has-text-centered is-size-7 has-text-grey">Trajectory 1</p>
+      </div>
+      <div class="column">
+        <div class="video-card"><video autoplay muted loop playsinline><source src="static/videos/camera_diverse_out_00020.mp4" type="video/mp4"></video></div>
+        <p class="has-text-centered is-size-7 has-text-grey">Trajectory 2</p>
+      </div>
+      <div class="column">
+        <div class="video-card"><video autoplay muted loop playsinline><source src="static/videos/camera_diverse_out_00008.mp4" type="video/mp4"></video></div>
+        <p class="has-text-centered is-size-7 has-text-grey">Trajectory 3</p>
+      </div>
+      <div class="column">
+        <div class="video-card"><video autoplay muted loop playsinline><source src="static/videos/camera_diverse_out_00032.mp4" type="video/mp4"></video></div>
+        <p class="has-text-centered is-size-7 has-text-grey">Trajectory 4</p>
+      </div>
+    </div>
+
     <h4 class="title is-5">From an Existing Video</h4>
     <p class="content">
       Given an existing video, we estimate its full camera parameters and re-render the scene
@@ -394,6 +414,26 @@
       </div>
     </div>
 
+    <h5 class="title is-6">Diverse Sparse Tracks <span class="has-text-grey-light has-text-weight-normal">(same source image)</span></h5>
+    <div class="columns is-mobile">
+      <div class="column">
+        <div class="video-card"><video autoplay muted loop playsinline><source src="static/videos/tracks_diverse_out_00007.mp4" type="video/mp4"></video></div>
+        <p class="has-text-centered is-size-7 has-text-grey">Tracks 1</p>
+      </div>
+      <div class="column">
+        <div class="video-card"><video autoplay muted loop playsinline><source src="static/videos/tracks_diverse_out_00008.mp4" type="video/mp4"></video></div>
+        <p class="has-text-centered is-size-7 has-text-grey">Tracks 2</p>
+      </div>
+      <div class="column">
+        <div class="video-card"><video autoplay muted loop playsinline><source src="static/videos/tracks_diverse_out_00009.mp4" type="video/mp4"></video></div>
+        <p class="has-text-centered is-size-7 has-text-grey">Tracks 3</p>
+      </div>
+      <div class="column">
+        <div class="video-card"><video autoplay muted loop playsinline><source src="static/videos/tracks_diverse_out_00010.mp4" type="video/mp4"></video></div>
+        <p class="has-text-centered is-size-7 has-text-grey">Tracks 4</p>
+      </div>
+    </div>
+
     <hr>
 
     <!-- Cut-on-Action -->
@@ -401,14 +441,33 @@
     <p class="content">
       Re-render a scene from a substantially different viewpoint while preserving the action and timing.
     </p>
-    <div class="columns is-centered">
+    <div class="columns">
       <div class="column is-half">
-        <video autoplay muted loop playsinline width="100%"><source src="static/videos/cut_input_2.mp4" type="video/mp4"></video>
+        <div class="video-card"><video autoplay muted loop playsinline><source src="static/videos/cut_input_2.mp4" type="video/mp4"></video></div>
         <p class="has-text-centered is-size-7 has-text-grey">Source Angle</p>
       </div>
       <div class="column is-half">
-        <video autoplay muted loop playsinline width="100%"><source src="static/videos/cut_out_4.mp4" type="video/mp4"></video>
+        <div class="video-card"><video autoplay muted loop playsinline><source src="static/videos/cut_out_4.mp4" type="video/mp4"></video></div>
         <p class="has-text-centered is-size-7 has-text-grey">Generated New Angle</p>
+      </div>
+    </div>
+    <h5 class="title is-6">Diverse Angles <span class="has-text-grey-light has-text-weight-normal">(same input video)</span></h5>
+    <div class="columns is-mobile">
+      <div class="column">
+        <div class="video-card"><video autoplay muted loop playsinline><source src="static/videos/cut_input.mp4" type="video/mp4"></video></div>
+        <p class="has-text-centered is-size-7 has-text-grey">Source Angle</p>
+      </div>
+      <div class="column">
+        <div class="video-card"><video autoplay muted loop playsinline><source src="static/videos/cut_out_1.mp4" type="video/mp4"></video></div>
+        <p class="has-text-centered is-size-7 has-text-grey">New Angle 1</p>
+      </div>
+      <div class="column">
+        <div class="video-card"><video autoplay muted loop playsinline><source src="static/videos/cut_out_2.mp4" type="video/mp4"></video></div>
+        <p class="has-text-centered is-size-7 has-text-grey">New Angle 2</p>
+      </div>
+      <div class="column">
+        <div class="video-card"><video autoplay muted loop playsinline><source src="static/videos/cut_out_3.mp4" type="video/mp4"></video></div>
+        <p class="has-text-centered is-size-7 has-text-grey">New Angle 3</p>
       </div>
     </div>
 
@@ -424,10 +483,15 @@
     <h4 class="title is-5">Audio Intensity Control</h4>
     <p class="content">
       Audio intensity control generates audio whose temporal dynamics follow the visual content.
+      The waveform below shows how the generated audio energy tracks the on-screen action.
     </p>
     <div class="columns is-centered">
       <div class="column is-two-thirds">
-        <div class="video-card"><video controls loop playsinline><source src="static/videos/audio_intensity_output.mp4" type="video/mp4"></video></div>
+        <div class="video-card">
+          <video id="audio-intensity-main" controls loop playsinline><source src="static/videos/audio_intensity_output.mp4" type="video/mp4"></video>
+          <video id="audio-intensity-waveform" muted loop playsinline style="margin-top: 4px;"><source src="static/videos/audio_intensity_waveform.mp4" type="video/mp4"></video>
+          <p class="has-text-centered is-size-7 has-text-grey" style="margin-top: 4px;">RMS Envelope Over Time</p>
+        </div>
       </div>
     </div>
 
@@ -602,6 +666,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+  // Video pair labels
   document.querySelectorAll('.video-pair').forEach(function(pair) {
     var videos = pair.querySelectorAll(':scope > video');
     if (videos.length !== 2) return;
@@ -616,6 +681,16 @@ document.addEventListener('DOMContentLoaded', function() {
       wrapper.appendChild(label);
     });
   });
+
+  // Sync audio intensity video with waveform
+  var main = document.getElementById('audio-intensity-main');
+  var wave = document.getElementById('audio-intensity-waveform');
+  if (main && wave) {
+    main.addEventListener('play', function() { wave.currentTime = main.currentTime; wave.play(); });
+    main.addEventListener('pause', function() { wave.pause(); });
+    main.addEventListener('seeked', function() { wave.currentTime = main.currentTime; });
+    main.addEventListener('ratechange', function() { wave.playbackRate = main.playbackRate; });
+  }
 });
 </script>
 
