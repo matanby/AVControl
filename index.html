@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>AVControl: Efficient Controls for Audio-Visual Generation</title>
+  <meta name="description" content="AVControl: a lightweight framework for training diverse audio-visual controls using LoRA adapters on a parallel canvas.">
+  <meta property="og:title" content="AVControl: Efficient Controls for Audio-Visual Generation">
+  <meta property="og:description" content="A lightweight framework for training diverse audio-visual controls using LoRA adapters on a parallel canvas.">
+  <meta property="og:image" content="static/images/teaser.png">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="static/css/index.css">
+</head>
+<body>
+
+<!-- Hero / Title -->
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">AVControl</h1>
+          <h2 class="subtitle is-3 publication-subtitle">Efficient Controls for Audio-Visual Generation</h2>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">Matan Ben-Yosef*,</span>
+            <span class="author-block">Tavi Halperin*,</span>
+            <span class="author-block">Naomi Ken Korem,</span>
+            <span class="author-block">Mohammad Salama,</span>
+            <span class="author-block">Harel Cain,</span>
+            <span class="author-block">Asaf Joseph,</span>
+            <span class="author-block">Anthony Chen,</span>
+            <span class="author-block">Urska Jelercic,</span>
+            <span class="author-block">Ofir Bibi</span>
+          </div>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">Lightricks</span>
+          </div>
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <span class="link-block">
+                <a href="#" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fas fa-file-pdf"></i></span>
+                  <span>Paper</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a href="#" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="ai ai-arxiv"></i></span>
+                  <span>arXiv</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a href="https://www.youtube.com/watch?v=f8D2CwF6BIY" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fab fa-youtube"></i></span>
+                  <span>Video</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a href="https://github.com/Lightricks/LTX-2/tree/main/packages/ltx-trainer" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fab fa-github"></i></span>
+                  <span>Code</span>
+                </a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Teaser Video (YouTube) -->
+<section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body">
+      <div class="publication-video">
+        <iframe src="https://www.youtube.com/embed/f8D2CwF6BIY?rel=0&showinfo=0"
+                frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      </div>
+      <h2 class="subtitle has-text-centered">
+        AVControl trains lightweight LoRA adapters on a frozen audio-visual backbone to enable
+        diverse control modalities — from depth and pose to camera trajectories and audio transformations.
+      </h2>
+    </div>
+  </div>
+</section>
+
+<!-- Abstract -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Controlling video and audio generation requires diverse modalities — from depth and pose
+            to camera trajectories and audio transformations — yet existing approaches either train
+            a single monolithic model for a fixed set of controls or introduce costly architectural
+            changes for each new modality.
+          </p>
+          <p>
+            We introduce <b>AVControl</b>, a lightweight, extendable framework where each control
+            modality is trained as a separate LoRA on a <em>parallel canvas</em> (a reference signal
+            provided as additional tokens in the attention layers), requiring no architectural changes
+            beyond the LoRA adapters themselves. We show that simply extending image-based in-context
+            methods to video via channel concatenation fails for structural control, and that our
+            parallel canvas approach resolves this.
+          </p>
+          <p>
+            On the VACE Benchmark, we outperform all evaluated baselines on depth- and pose-guided
+            generation, inpainting, and outpainting. The framework supports a diverse set of
+            independently trained modalities: spatially-aligned controls (depth, pose, edges),
+            camera trajectory with intrinsics, sparse motion control, video editing, and
+            audio-visual applications. Most modalities converge within a few thousand optimization
+            steps on small datasets.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Method Overview -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Method Overview</h2>
+    <div class="content has-text-centered">
+      <video id="method-video" autoplay muted loop playsinline width="100%">
+        <source src="static/videos/pipeline_video.mp4" type="video/mp4">
+      </video>
+      <p class="has-text-justified">
+        AVControl places the reference control signal on a <b>parallel canvas</b> — as additional
+        tokens processed alongside the generation target in the model's self-attention layers.
+        The only trainable component is a lightweight LoRA adapter; the audio-visual backbone
+        remains entirely frozen. Each control modality is trained as its own independent LoRA,
+        keeping individual runs small and focused.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Training Efficiency -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Training Efficiency</h2>
+    <div class="content has-text-centered">
+      <img src="static/images/training_efficiency.png" alt="Training efficiency comparison" style="max-width: 600px; width: 100%;">
+      <p class="has-text-justified" style="margin-top: 1rem;">
+        Each LoRA trains in as few as 200 to at most 15,000 steps, on small datasets ranging from
+        a few hundred to a few thousand samples. The total budget across all modalities is roughly
+        55,000 steps — less than one third of a single VACE training run (200K steps).
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== CONTROL MODALITIES ==================== -->
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Control Modalities</h2>
+
+    <!-- Spatially-Aligned Controls -->
+    <h3 class="title is-4">Spatially-Aligned Controls</h3>
+    <p class="content">
+      Depth, pose, and edge maps each guide the generation through their own independently trained
+      LoRA. The outputs faithfully follow the spatial structure while maintaining natural motion and
+      visual quality.
+    </p>
+    <div class="columns is-multiline">
+      <div class="column is-one-third">
+        <h4 class="title is-6 has-text-centered">Depth</h4>
+        <div class="video-pair">
+          <video autoplay muted loop playsinline><source src="static/videos/depth_cond_1.mp4" type="video/mp4"></video>
+          <video autoplay muted loop playsinline><source src="static/videos/depth_out_1.mp4" type="video/mp4"></video>
+        </div>
+      </div>
+      <div class="column is-one-third">
+        <h4 class="title is-6 has-text-centered">Pose</h4>
+        <div class="video-pair">
+          <video autoplay muted loop playsinline><source src="static/videos/pose_cond_1.mp4" type="video/mp4"></video>
+          <video autoplay muted loop playsinline><source src="static/videos/pose_out_1.mp4" type="video/mp4"></video>
+        </div>
+      </div>
+      <div class="column is-one-third">
+        <h4 class="title is-6 has-text-centered">Edge</h4>
+        <div class="video-pair">
+          <video autoplay muted loop playsinline><source src="static/videos/canny_cond_1.mp4" type="video/mp4"></video>
+          <video autoplay muted loop playsinline><source src="static/videos/canny_out_1.mp4" type="video/mp4"></video>
+        </div>
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- Strength Modulation -->
+    <h3 class="title is-4">Inference-Time Strength Control</h3>
+    <p class="content">
+      Because reference and target interact through self-attention, we can continuously modulate
+      control strength at inference time. This is impossible with channel-concatenation methods.
+    </p>
+    <div class="columns is-multiline">
+      <div class="column is-one-fifth">
+        <h4 class="title is-6 has-text-centered">Condition</h4>
+        <video autoplay muted loop playsinline width="100%"><source src="static/videos/strength_depth_condition.mp4" type="video/mp4"></video>
+      </div>
+      <div class="column is-one-fifth">
+        <h4 class="title is-6 has-text-centered">Strength 0.0</h4>
+        <video autoplay muted loop playsinline width="100%"><source src="static/videos/strength_0.0.mp4" type="video/mp4"></video>
+      </div>
+      <div class="column is-one-fifth">
+        <h4 class="title is-6 has-text-centered">Strength 0.25</h4>
+        <video autoplay muted loop playsinline width="100%"><source src="static/videos/strength_0.25.mp4" type="video/mp4"></video>
+      </div>
+      <div class="column is-one-fifth">
+        <h4 class="title is-6 has-text-centered">Strength 0.5</h4>
+        <video autoplay muted loop playsinline width="100%"><source src="static/videos/strength_0.5.mp4" type="video/mp4"></video>
+      </div>
+      <div class="column is-one-fifth">
+        <h4 class="title is-6 has-text-centered">Strength 1.0</h4>
+        <video autoplay muted loop playsinline width="100%"><source src="static/videos/strength_1.0.mp4" type="video/mp4"></video>
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- Video Editing -->
+    <h3 class="title is-4">Video Editing</h3>
+
+    <h4 class="title is-5">Inpainting</h4>
+    <div class="columns">
+      <div class="column">
+        <div class="video-pair">
+          <video autoplay muted loop playsinline><source src="static/videos/inpaint_cond_1.mp4" type="video/mp4"></video>
+          <video autoplay muted loop playsinline><source src="static/videos/inpaint_out_1.mp4" type="video/mp4"></video>
+        </div>
+        <p class="has-text-centered is-size-7 has-text-grey">Input with Mask → Inpainted Result</p>
+      </div>
+      <div class="column">
+        <div class="video-pair">
+          <video autoplay muted loop playsinline><source src="static/videos/inpaint_cond_2.mp4" type="video/mp4"></video>
+          <video autoplay muted loop playsinline><source src="static/videos/inpaint_out_2.mp4" type="video/mp4"></video>
+        </div>
+        <p class="has-text-centered is-size-7 has-text-grey">Input with Mask → Inpainted Result</p>
+      </div>
+    </div>
+
+    <h4 class="title is-5">Outpainting</h4>
+    <div class="columns">
+      <div class="column">
+        <div class="video-pair">
+          <video autoplay muted loop playsinline><source src="static/videos/outpaint_cond_1.mp4" type="video/mp4"></video>
+          <video autoplay muted loop playsinline><source src="static/videos/outpaint_out_1.mp4" type="video/mp4"></video>
+        </div>
+        <p class="has-text-centered is-size-7 has-text-grey">Cropped Input → Outpainted Result</p>
+      </div>
+      <div class="column">
+        <div class="video-pair">
+          <video autoplay muted loop playsinline><source src="static/videos/outpaint_cond_2.mp4" type="video/mp4"></video>
+          <video autoplay muted loop playsinline><source src="static/videos/outpaint_out_2.mp4" type="video/mp4"></video>
+        </div>
+        <p class="has-text-centered is-size-7 has-text-grey">Cropped Input → Outpainted Result</p>
+      </div>
+    </div>
+
+    <h4 class="title is-5">Local Edit <span class="has-text-grey-light has-text-weight-normal is-size-6">(mask-free)</span></h4>
+    <div class="columns">
+      <div class="column">
+        <div class="video-pair">
+          <video autoplay muted loop playsinline><source src="static/videos/local_edit_cond_1.mp4" type="video/mp4"></video>
+          <video autoplay muted loop playsinline><source src="static/videos/local_edit_out_1.mp4" type="video/mp4"></video>
+        </div>
+        <p class="has-text-centered is-size-7 has-text-grey">Original → Edited Output</p>
+      </div>
+      <div class="column">
+        <div class="video-pair">
+          <video autoplay muted loop playsinline><source src="static/videos/local_edit_cond_2.mp4" type="video/mp4"></video>
+          <video autoplay muted loop playsinline><source src="static/videos/local_edit_out_2.mp4" type="video/mp4"></video>
+        </div>
+        <p class="has-text-centered is-size-7 has-text-grey">Original → Edited Output</p>
+      </div>
+    </div>
+
+    <h4 class="title is-5">Video Detailing</h4>
+    <div class="columns is-centered">
+      <div class="column is-half">
+        <div class="video-pair">
+          <video autoplay muted loop playsinline><source src="static/videos/detailing_cond_1.mp4" type="video/mp4"></video>
+          <video autoplay muted loop playsinline><source src="static/videos/detailing_out_1.mp4" type="video/mp4"></video>
+        </div>
+        <p class="has-text-centered is-size-7 has-text-grey">Low-res Input → Detailed Output</p>
+      </div>
+      <div class="column is-half">
+        <div class="video-pair">
+          <video autoplay muted loop playsinline><source src="static/videos/detailing_cond_1_crop.mp4" type="video/mp4"></video>
+          <video autoplay muted loop playsinline><source src="static/videos/detailing_out_1_crop.mp4" type="video/mp4"></video>
+        </div>
+        <p class="has-text-centered is-size-7 has-text-grey">Crop comparison</p>
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- Camera Trajectory -->
+    <h3 class="title is-4">Camera Trajectory Control</h3>
+
+    <h4 class="title is-5">From a Single Image</h4>
+    <p class="content">
+      From a single image, we generate video with a specified camera motion. The desired trajectory
+      is encoded as a warped grid on the reference canvas.
+    </p>
+    <div class="columns">
+      <div class="column">
+        <div class="video-pair">
+          <video autoplay muted loop playsinline><source src="static/videos/camera_image_condition.mp4" type="video/mp4"></video>
+          <video autoplay muted loop playsinline><source src="static/videos/camera_image_output.mp4" type="video/mp4"></video>
+        </div>
+        <p class="has-text-centered is-size-7 has-text-grey">Camera Grid → Generated Output</p>
+      </div>
+      <div class="column">
+        <div class="video-pair">
+          <video autoplay muted loop playsinline><source src="static/videos/camera_image_condition_2.mp4" type="video/mp4"></video>
+          <video autoplay muted loop playsinline><source src="static/videos/camera_image_output_2.mp4" type="video/mp4"></video>
+        </div>
+        <p class="has-text-centered is-size-7 has-text-grey">Camera Grid → Generated Output</p>
+      </div>
+    </div>
+
+    <h4 class="title is-5">From an Existing Video</h4>
+    <p class="content">
+      Given an existing video, we estimate its full camera parameters and re-render the scene
+      at a new trajectory while preserving the original scene dynamics.
+    </p>
+    <div class="columns is-mobile">
+      <div class="column is-one-third">
+        <h5 class="title is-6 has-text-centered">Source Video</h5>
+        <video autoplay muted loop playsinline width="100%"><source src="static/videos/camera_video_source.mp4" type="video/mp4"></video>
+      </div>
+      <div class="column is-one-third">
+        <h5 class="title is-6 has-text-centered">Camera Grid</h5>
+        <video autoplay muted loop playsinline width="100%"><source src="static/videos/camera_video_condition.mp4" type="video/mp4"></video>
+      </div>
+      <div class="column is-one-third">
+        <h5 class="title is-6 has-text-centered">Re-rendered</h5>
+        <video autoplay muted loop playsinline width="100%"><source src="static/videos/camera_video_output.mp4" type="video/mp4"></video>
+      </div>
+    </div>
+
+    <h5 class="title is-6">Diverse Camera Trajectories <span class="has-text-grey-light has-text-weight-normal">(same source video)</span></h5>
+    <div class="columns is-mobile">
+      <div class="column">
+        <video autoplay muted loop playsinline width="100%"><source src="static/videos/camera_v2v_diverse_source.mp4" type="video/mp4"></video>
+        <p class="has-text-centered is-size-7 has-text-grey">Source</p>
+      </div>
+      <div class="column">
+        <video autoplay muted loop playsinline width="100%"><source src="static/videos/camera_v2v_diverse_out_00015.mp4" type="video/mp4"></video>
+        <p class="has-text-centered is-size-7 has-text-grey">Trajectory 1</p>
+      </div>
+      <div class="column">
+        <video autoplay muted loop playsinline width="100%"><source src="static/videos/camera_v2v_diverse_out_00016.mp4" type="video/mp4"></video>
+        <p class="has-text-centered is-size-7 has-text-grey">Trajectory 2</p>
+      </div>
+      <div class="column">
+        <video autoplay muted loop playsinline width="100%"><source src="static/videos/camera_v2v_diverse_out_00018.mp4" type="video/mp4"></video>
+        <p class="has-text-centered is-size-7 has-text-grey">Trajectory 3</p>
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- Sparse Track Control -->
+    <h3 class="title is-4">Sparse Track Control</h3>
+    <p class="content">
+      Point tracks are rendered as colored dots on a black canvas. The LoRA generates a video
+      that follows these trajectories, enabling fine-grained control over object motion.
+    </p>
+    <div class="columns">
+      <div class="column">
+        <div class="video-pair">
+          <video autoplay muted loop playsinline><source src="static/videos/tracks_cond_3.mp4" type="video/mp4"></video>
+          <video autoplay muted loop playsinline><source src="static/videos/tracks_out_3.mp4" type="video/mp4"></video>
+        </div>
+        <p class="has-text-centered is-size-7 has-text-grey">Track Dots → Generated Output</p>
+      </div>
+      <div class="column">
+        <div class="video-pair">
+          <video autoplay muted loop playsinline><source src="static/videos/tracks_condition.mp4" type="video/mp4"></video>
+          <video autoplay muted loop playsinline><source src="static/videos/tracks_output.mp4" type="video/mp4"></video>
+        </div>
+        <p class="has-text-centered is-size-7 has-text-grey">Track Dots → Generated Output</p>
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- Cut-on-Action -->
+    <h3 class="title is-4">Cut-on-Action</h3>
+    <p class="content">
+      Re-render a scene from a substantially different viewpoint while preserving the action and timing.
+    </p>
+    <div class="columns is-centered">
+      <div class="column is-half">
+        <div class="video-pair">
+          <video autoplay muted loop playsinline><source src="static/videos/cut_input_2.mp4" type="video/mp4"></video>
+          <video autoplay muted loop playsinline><source src="static/videos/cut_out_4.mp4" type="video/mp4"></video>
+        </div>
+        <p class="has-text-centered is-size-7 has-text-grey">Source Angle → Generated New Angle</p>
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- Audio-Visual Applications -->
+    <h3 class="title is-4">Audio-Visual Applications</h3>
+    <p class="content has-text-centered" style="margin-bottom: 1.5rem;">
+      <span class="icon"><i class="fas fa-volume-up"></i></span>
+      <em>The following examples contain audio — please turn on your speakers.</em>
+    </p>
+
+    <h4 class="title is-5">Audio Intensity Control</h4>
+    <p class="content">
+      Audio intensity control generates audio whose temporal dynamics follow the visual content.
+    </p>
+    <div class="columns is-centered">
+      <div class="column is-two-thirds">
+        <video controls loop playsinline width="100%"><source src="static/videos/audio_intensity_output.mp4" type="video/mp4"></video>
+      </div>
+    </div>
+
+    <h4 class="title is-5">Speech &rarr; Ambient Scene</h4>
+    <p class="content">
+      Embed clean speech within ambient sounds matching a described scene.
+    </p>
+    <div class="columns">
+      <div class="column">
+        <video controls playsinline width="100%"><source src="static/videos/speech_ambient_condition.mp4" type="video/mp4"></video>
+        <p class="has-text-centered is-size-7 has-text-grey">Condition — Clean Speech</p>
+      </div>
+      <div class="column">
+        <video controls playsinline width="100%"><source src="static/videos/speech_ambient_output.mp4" type="video/mp4"></video>
+        <p class="has-text-centered is-size-7 has-text-grey">Output — Ambient Audio</p>
+      </div>
+    </div>
+
+    <h4 class="title is-5">Who-is-Talking Control</h4>
+    <p class="content">
+      Generate multi-person talking video with synchronized lip motion from an abstract
+      layout of colored bounding boxes indicating who speaks when.
+    </p>
+    <div class="columns">
+      <div class="column">
+        <div class="video-pair">
+          <video autoplay muted loop playsinline><source src="static/videos/whoistalking_cond_1.mp4" type="video/mp4"></video>
+          <video controls playsinline><source src="static/videos/whoistalking_out_1.mp4" type="video/mp4"></video>
+        </div>
+        <p class="has-text-centered is-size-7 has-text-grey">Bounding Boxes → Generated Output</p>
+      </div>
+      <div class="column">
+        <div class="video-pair">
+          <video autoplay muted loop playsinline><source src="static/videos/whoistalking_cond_2.mp4" type="video/mp4"></video>
+          <video controls playsinline><source src="static/videos/whoistalking_out_2.mp4" type="video/mp4"></video>
+        </div>
+        <p class="has-text-centered is-size-7 has-text-grey">Bounding Boxes → Generated Output</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== COMPARISONS ==================== -->
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Comparison vs. VACE</h2>
+
+    <h4 class="title is-5">Depth-Conditioned Generation</h4>
+    <div class="columns is-mobile">
+      <div class="column is-one-third">
+        <h5 class="title is-6 has-text-centered">Control Signal</h5>
+        <video autoplay muted loop playsinline width="100%"><source src="static/videos/comp_depth_control_1.mp4" type="video/mp4"></video>
+      </div>
+      <div class="column is-one-third">
+        <h5 class="title is-6 has-text-centered">Ours</h5>
+        <video autoplay muted loop playsinline width="100%"><source src="static/videos/comp_depth_ours_1.mp4" type="video/mp4"></video>
+      </div>
+      <div class="column is-one-third">
+        <h5 class="title is-6 has-text-centered">VACE</h5>
+        <video autoplay muted loop playsinline width="100%"><source src="static/videos/comp_depth_vace_1.mp4" type="video/mp4"></video>
+      </div>
+    </div>
+    <div class="columns is-mobile">
+      <div class="column is-one-third">
+        <video autoplay muted loop playsinline width="100%"><source src="static/videos/comp_depth_control_2.mp4" type="video/mp4"></video>
+      </div>
+      <div class="column is-one-third">
+        <video autoplay muted loop playsinline width="100%"><source src="static/videos/comp_depth_ours_2.mp4" type="video/mp4"></video>
+      </div>
+      <div class="column is-one-third">
+        <video autoplay muted loop playsinline width="100%"><source src="static/videos/comp_depth_vace_2.mp4" type="video/mp4"></video>
+      </div>
+    </div>
+
+    <h4 class="title is-5" style="margin-top: 2rem;">Pose-Conditioned Generation</h4>
+    <div class="columns is-mobile">
+      <div class="column is-one-third">
+        <h5 class="title is-6 has-text-centered">Control Signal</h5>
+        <video autoplay muted loop playsinline width="100%"><source src="static/videos/comp_pose_control_1.mp4" type="video/mp4"></video>
+      </div>
+      <div class="column is-one-third">
+        <h5 class="title is-6 has-text-centered">Ours</h5>
+        <video autoplay muted loop playsinline width="100%"><source src="static/videos/comp_pose_ours_1.mp4" type="video/mp4"></video>
+      </div>
+      <div class="column is-one-third">
+        <h5 class="title is-6 has-text-centered">VACE</h5>
+        <video autoplay muted loop playsinline width="100%"><source src="static/videos/comp_pose_vace_1.mp4" type="video/mp4"></video>
+      </div>
+    </div>
+    <div class="columns is-mobile">
+      <div class="column is-one-third">
+        <video autoplay muted loop playsinline width="100%"><source src="static/videos/comp_pose_control_2.mp4" type="video/mp4"></video>
+      </div>
+      <div class="column is-one-third">
+        <video autoplay muted loop playsinline width="100%"><source src="static/videos/comp_pose_ours_2.mp4" type="video/mp4"></video>
+      </div>
+      <div class="column is-one-third">
+        <video autoplay muted loop playsinline width="100%"><source src="static/videos/comp_pose_vace_2.mp4" type="video/mp4"></video>
+      </div>
+    </div>
+
+    <!-- Results Summary Table -->
+    <h3 class="title is-4 has-text-centered" style="margin-top: 3rem;">Results Across Benchmarks</h3>
+    <div class="columns is-centered">
+      <div class="column is-four-fifths">
+        <table class="table is-bordered is-striped is-fullwidth results-table">
+          <thead>
+            <tr>
+              <th>Benchmark</th>
+              <th>Task</th>
+              <th>Key Metric</th>
+              <th>Δ vs. Best Baseline</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>VACE Benchmark</td>
+              <td>Depth / Pose / Inpaint / Outpaint</td>
+              <td>VBench Avg</td>
+              <td><strong>+2.3 to +3.8</strong> vs. VACE — best on all 4 tasks</td>
+            </tr>
+            <tr>
+              <td>ReCamMaster</td>
+              <td>Camera trajectory</td>
+              <td>CLIP-F 99.13%</td>
+              <td><strong>+0.39</strong> vs. ReCamMaster (98.74%)</td>
+            </tr>
+            <tr>
+              <td>VGGSound</td>
+              <td>Audio intensity</td>
+              <td>IS 34.51</td>
+              <td><strong>Best</strong> among all methods</td>
+            </tr>
+            <tr>
+              <td>HDTF</td>
+              <td>Who-is-talking</td>
+              <td>E-FID 0.18</td>
+              <td><strong>Best</strong> E-FID and FID (12.31)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BibTeX -->
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@article{benyosef2025avcontrol,
+  title     = {AVControl: Efficient Controls for Audio-Visual Generation},
+  author    = {Ben-Yosef, Matan and Halperin, Tavi and Ken Korem, Naomi and Salama, Mohammad and Cain, Harel and Joseph, Asaf and Chen, Anthony and Jelercic, Urska and Bibi, Ofir},
+  year      = {2025},
+}</code></pre>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <p>
+        This website template is borrowed from <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a>
+        and is licensed under a
+        <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+      </p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
