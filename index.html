@@ -517,15 +517,15 @@
     </p>
     <div class="columns">
       <div class="column">
-        <div class="video-pair">
-          <video autoplay muted loop playsinline><source src="static/videos/whoistalking_cond_1.mp4" type="video/mp4"></video>
+        <div class="video-pair video-sync-pair">
+          <video muted playsinline><source src="static/videos/whoistalking_cond_1.mp4" type="video/mp4"></video>
           <video controls playsinline><source src="static/videos/whoistalking_out_1.mp4" type="video/mp4"></video>
         </div>
         <p class="has-text-centered is-size-7 has-text-grey">Bounding Boxes → Generated Output</p>
       </div>
       <div class="column">
-        <div class="video-pair">
-          <video autoplay muted loop playsinline><source src="static/videos/whoistalking_cond_2.mp4" type="video/mp4"></video>
+        <div class="video-pair video-sync-pair">
+          <video muted playsinline><source src="static/videos/whoistalking_cond_2.mp4" type="video/mp4"></video>
           <video controls playsinline><source src="static/videos/whoistalking_out_2.mp4" type="video/mp4"></video>
         </div>
         <p class="has-text-centered is-size-7 has-text-grey">Bounding Boxes → Generated Output</p>
@@ -682,15 +682,24 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
+  // Generic sync: the second video (with controls) drives the first (muted follower)
+  function syncPair(driver, follower) {
+    driver.addEventListener('play', function() { follower.currentTime = driver.currentTime; follower.play(); });
+    driver.addEventListener('pause', function() { follower.pause(); });
+    driver.addEventListener('seeked', function() { follower.currentTime = driver.currentTime; });
+    driver.addEventListener('ratechange', function() { follower.playbackRate = driver.playbackRate; });
+  }
+
   // Sync audio intensity video with waveform
   var main = document.getElementById('audio-intensity-main');
   var wave = document.getElementById('audio-intensity-waveform');
-  if (main && wave) {
-    main.addEventListener('play', function() { wave.currentTime = main.currentTime; wave.play(); });
-    main.addEventListener('pause', function() { wave.pause(); });
-    main.addEventListener('seeked', function() { wave.currentTime = main.currentTime; });
-    main.addEventListener('ratechange', function() { wave.playbackRate = main.playbackRate; });
-  }
+  if (main && wave) { syncPair(main, wave); }
+
+  // Sync who-is-talking pairs: output (with controls) drives condition (muted)
+  document.querySelectorAll('.video-sync-pair').forEach(function(pair) {
+    var videos = pair.querySelectorAll('video');
+    if (videos.length === 2) { syncPair(videos[1], videos[0]); }
+  });
 });
 </script>
 
