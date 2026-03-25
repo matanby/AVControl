@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>AVControl: Efficient Controls for Audio-Visual Generation</title>
+  <title>AVControl: Efficient Framework for Training Audio-Visual Controls</title>
   <meta name="description" content="AVControl: a lightweight framework for training diverse audio-visual controls using LoRA adapters on a parallel canvas.">
-  <meta property="og:title" content="AVControl: Efficient Controls for Audio-Visual Generation">
+  <meta property="og:title" content="AVControl: Efficient Framework for Training Audio-Visual Controls">
   <meta property="og:description" content="A lightweight framework for training diverse audio-visual controls using LoRA adapters on a parallel canvas.">
   <meta property="og:image" content="static/images/teaser.png">
   <meta property="og:type" content="website">
@@ -26,7 +26,7 @@
       <div class="columns is-centered">
         <div class="column has-text-centered">
           <h1 class="title is-1 publication-title">AVControl</h1>
-          <h2 class="subtitle is-3 publication-subtitle">Efficient Controls for Audio-Visual Generation</h2>
+          <h2 class="subtitle is-3 publication-subtitle">Efficient Framework for Training Audio-Visual Controls</h2>
           <div class="is-size-5 publication-authors">
             <span class="author-block"><a href="https://www.linkedin.com/in/matanby/">Matan Ben-Yosef</a>*,</span>
             <span class="author-block"><a href="https://tavihalperin.me/">Tavi Halperin</a>*,</span>
@@ -107,18 +107,21 @@
             We introduce <b>AVControl</b>, a lightweight, extendable framework built on
             <a href="https://ltx.io/model/ltx-2">LTX-2</a>, a joint audio-visual foundation model,
             where each control modality is trained as a separate LoRA on a <em>parallel canvas</em>
-            (a reference signal provided as additional tokens in the attention layers), requiring
+            that provides the reference signal as additional tokens in the attention layers, requiring
             no architectural changes beyond the LoRA adapters themselves. We show that simply extending image-based in-context
-            methods to video via channel concatenation fails for structural control, and that our
+            methods to video fails for structural control, and that our
             parallel canvas approach resolves this.
           </p>
           <p>
             On the VACE Benchmark, we outperform all evaluated baselines on depth- and pose-guided
-            generation, inpainting, and outpainting. The framework supports a diverse set of
-            independently trained modalities: spatially-aligned controls (depth, pose, edges),
-            camera trajectory with intrinsics, sparse motion control, video editing, and
-            audio-visual applications. Most modalities converge within a few thousand optimization
-            steps on small datasets.
+            generation, inpainting, and outpainting, and show competitive results on camera control
+            and audio-visual benchmarks. Our framework supports a diverse set of
+            independently trained modalities: spatially-aligned controls such as depth, pose, and edges,
+            camera trajectory with intrinsics, sparse motion control, video editing, and,
+            to our knowledge, the first modular audio-visual controls for a joint generation model.
+            Our method is both compute- and data-efficient: each modality requires only a small dataset
+            and converges within a few hundred to a few thousand training steps, a fraction of the budget
+            of monolithic alternatives.
           </p>
         </div>
       </div>
@@ -150,7 +153,7 @@
     <div class="content has-text-centered">
       <img src="static/images/training_efficiency.png" alt="Training efficiency comparison" style="max-width: 900px; width: 100%;">
       <p class="has-text-justified" style="margin-top: 1rem;">
-        Each LoRA trains in as few as 200 to at most 15,000 steps, on small datasets ranging from
+        Each LoRA trains in as few as a few hundred to at most 15,000 steps, on small datasets ranging from
         a few hundred to a few thousand samples. The total budget across all modalities is roughly
         55,000 steps — less than one third of a single VACE training run (200K steps).
       </p>
@@ -644,8 +647,8 @@
 <section class="section" id="BibTeX">
   <div class="container is-max-desktop content">
     <h2 class="title">BibTeX</h2>
-    <pre><code>@article{benyosef2025avcontrol,
-  title     = {AVControl: Efficient Controls for Audio-Visual Generation},
+    <pre><code>@article{benyosef2026avcontrol,
+  title     = {AVControl: Efficient Framework for Training Audio-Visual Controls},
   author    = {Ben-Yosef, Matan and Halperin, Tavi and Ken Korem, Naomi and Salama, Mohammad and Cain, Harel and Joseph, Asaf and Chen, Anthony and Jelercic, Urska and Bibi, Ofir},
   year      = {2026},
 }</code></pre>
