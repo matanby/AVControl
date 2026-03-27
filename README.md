@@ -1,9 +1,11 @@
 # AVControl: Efficient Framework for Training Audio-Visual Controls
 
-[![Project Page](https://img.shields.io/badge/🌐_Project_Page-blue)](https://matanby.github.io/AVControl/)
-[![arXiv](https://img.shields.io/badge/arXiv-2603.24793-b31b1b)](https://arxiv.org/abs/2603.24793)
-[![YouTube](https://img.shields.io/badge/Video-YouTube-red)](https://www.youtube.com/watch?v=f8D2CwF6BIY)
-[![Code](https://img.shields.io/badge/Code-GitHub-black)](https://github.com/Lightricks/LTX-2/tree/main/packages/ltx-trainer)
+<p align="center">
+  <a href="https://matanby.github.io/AVControl/"><img src="https://img.shields.io/badge/🌐_Project_Page-blue" alt="Project Page"></a>
+  <a href="https://arxiv.org/abs/2603.24793"><img src="https://img.shields.io/badge/arXiv-2603.24793-b31b1b" alt="arXiv"></a>
+  <a href="https://www.youtube.com/watch?v=f8D2CwF6BIY"><img src="https://img.shields.io/badge/Video-YouTube-red" alt="YouTube"></a>
+  <a href="https://github.com/Lightricks/LTX-2/tree/main/packages/ltx-trainer"><img src="https://img.shields.io/badge/Code-GitHub-black" alt="Code"></a>
+</p>
 
 **Matan Ben-Yosef\*, Tavi Halperin\*, Naomi Ken Korem, Mohammad Salama, Harel Cain, Asaf Joseph, Anthony Chen, Urska Jelercic, Ofir Bibi**
 
